@@ -12,7 +12,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
     exit();
 }
 
-
 // Initialize variables
 $selected_date = '';
 $searchQuery = ''; // Variable for the search query
@@ -83,7 +82,307 @@ $total_quantity = 0;
     <link rel="icon" href="img/GSL25_transparent 2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-    
+    <style>
+        /* Body and general styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            margin: 0;
+            color: #2c3e50;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dark-mode {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            color: #ecf0f1;
+            padding: 30px 20px;
+            height: 100vh;
+            position: fixed;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .sidebarHeader h2 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .sidebarNav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebarNav ul li {
+            margin: 1.2rem 0;
+        }
+
+        .sidebarNav ul li a {
+            text-decoration: none;
+            color: #ecf0f1;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .sidebarNav ul li a:hover {
+            background-color: #2980b9;
+        }
+
+        .sidebarNav ul li a i {
+            margin-right: 15px;
+        }
+
+        .mainContent {
+            margin-left: 280px;
+            padding: 30px;
+            width: calc(100% - 280px);
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .mainHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mainHeader h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .headerActions .button i {
+            margin-right: 8px;
+        }
+
+        .ordersTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            margin-top: 20px;
+        }
+
+        .ordersTable th, .ordersTable td {
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .ordersTable th {
+            background-color: #3498db;
+            color: #ffffff;
+        }
+
+        .ordersTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .dark-mode .ordersTable th {
+            background-color: #2980b9;
+        }
+
+        .dark-mode .ordersTable tr:nth-child(even) {
+            background-color: #34495e;
+        }
+
+        .button {
+            background-color: #ffffff;
+            color: #c0392b;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid #3498db;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #3498db;
+            color: #ffffff;
+        }
+
+        .totalOrders {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .mainContent {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .mainHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .headerActions {
+            display: flex;
+            align-items: center;
+        }
+
+        .headerActions .button {
+            margin-right: 10px;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .headerActions .button:hover {
+            background-color: #45a049;
+        }
+
+        /* Search Form Styling */
+        .search-form {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 250px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .search-button:hover {
+            background-color: #45a049;
+        }
+
+        .search-input:focus {
+            border-color: #4CAF50;
+        }
+
+        /* Styling for the clear search button */
+        .clear-button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        .clear-button:hover {
+            background-color: #c0392b;
+        }
+
+        .clear-button:focus {
+            outline: none;
+        }
+
+        /* Customer Table Styling */
+        .customer-table {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+
+        .customer-table th {
+            background-color: #2980b9;
+            color: #ffffff;
+        }
+
+        .customer-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        
+        .order-row td {
+            text-align: center;
+        }
+
+        .order-row {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .order-date-row {
+            text-align: left;
+            padding-left: 10px;
+            font-weight: bold;
+        }
+/* Style for the Delete All button */
+.delete-all .button {
+    background-color: #ff6666; /* Red color for deletion */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.delete-all .button:hover {
+    background-color: #ff3333; /* Darker red on hover */
+}
+
+        /* Position logout button inside the sidebar */
+        .logout-form {
+            margin-top: auto; /* Push the logout button to the bottom */
+        }
+
+        .logout-button {
+            background-color: #e74c3c; /* Red background */
+            color: #ffffff; /* White text */
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%; /* Make button take full width */
+            display: flex; /* Use flexbox for alignment */
+            align-items: center; /* Center items vertically */
+            justify-content: center; /* Center items horizontally */
+            transition: background-color 0.3s;
+            margin-top: 10px; /* Add margin to top to space out from other links */
+        }
+
+        .logout-button i {
+            margin-right: 8px; /* Space between the icon and text */
+            font-size: 1.2rem; /* Adjust the icon size */
+        }
+
+        .logout-button:hover {
+            background-color: #c0392b; /* Darker red on hover */
+        }
+    </style>
 </head>
 <body>
 <aside class="sidebar">
