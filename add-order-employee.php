@@ -160,7 +160,8 @@ $product_sizes_json = json_encode($product_sizes);
                 <label for="order_date" class="text-sm font-medium text-gray-700">Order Date:</label>
                 <input type="date" id="order_date" name="order_date" required class="border border-gray-300 text-gray-800 rounded p-3 w-full mt-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Select order date">
 
-                <div id="selectedProducts" class="mt-4 space-y-4 overflow-hidden"></div>
+                <div id="selectedProducts" class="flex flex-wrap justify-between mt-2 space-y-2 overflow-auto p-4 bg-white shadow-md rounded-lg border border-gray-300">
+                </div>
 
                 <div class="total-amount mt-4">
                     <label for="total_amount" class="text-sm font-medium text-gray-700">Total Amount:</label>
@@ -208,67 +209,76 @@ $product_sizes_json = json_encode($product_sizes);
         // Set the order date field to today's date
         document.getElementById('order_date').value = new Date().toISOString().split('T')[0];
 
-        // Function to add selected product to the form
         function addProductToForm(productName, size, price) {
-            var selectedProductsContainer = document.getElementById('selectedProducts');
-            
-            // Check if the product already exists in the selected products container
-            var existingProduct = Array.from(selectedProductsContainer.getElementsByClassName('product-entry')).find(function(entry) {
-                return entry.querySelector('input[name="product_name[]"]').value === productName &&
-                       entry.querySelector('input[name="size[]"]').value === size;
-            });
+    var selectedProductsContainer = document.getElementById('selectedProducts');
+    
+    // Check if the product already exists in the selected products container
+    var existingProduct = Array.from(selectedProductsContainer.getElementsByClassName('product-entry')).find(function(entry) {
+        return entry.querySelector('input[name="product_name[]"]').value === productName &&
+               entry.querySelector('input[name="size[]"]').value === size;
+    });
 
-            // If product exists, update the quantity
-            if (existingProduct) {
-                var quantityInput = existingProduct.querySelector('input[name="quantity[]"]');
-                quantityInput.value = parseInt(quantityInput.value) + 1; // Increase quantity by 1
-            } else {
-                // If product does not exist, create a new entry
-                var productEntry = document.createElement('div');
-                productEntry.classList.add('product-entry', 'mb-4', 'flex', 'items-center', 'border', 'p-3', 'bg-gray-100', 'rounded');
+    // If product exists, update the quantity
+    if (existingProduct) {
+        var quantityInput = existingProduct.querySelector('input[name="quantity[]"]');
+        quantityInput.value = parseInt(quantityInput.value) + 1; // Increase quantity by 1
+    } else {
+        // If product does not exist, create a new entry
+        var productEntry = document.createElement('div');
+        productEntry.classList.add('product-entry', 'mb-3', 'flex', 'items-center', 'border', 'border-gray-300', 'p-3', 'bg-gray-200', 'rounded-lg', 'shadow-sm');
 
-                // Product Name
-                var productNameInput = document.createElement('input');
-                productNameInput.type = 'text';
-                productNameInput.name = 'product_name[]';
-                productNameInput.value = productName;
-                productNameInput.readOnly = true;
-                productEntry.appendChild(productNameInput);
+        // Product Name
+        var productNameInput = document.createElement('input');
+        productNameInput.type = 'text';
+        productNameInput.name = 'product_name[]';
+        productNameInput.value = productName;
+        productNameInput.readOnly = true;
+        productEntry.appendChild(productNameInput);
 
-                // Product Size
-                var sizeInput = document.createElement('input');
-                sizeInput.type = 'text';
-                sizeInput.name = 'size[]';
-                sizeInput.value = size;
-                sizeInput.readOnly = true;
-                productEntry.appendChild(sizeInput);
+        // Product Size
+        var sizeInput = document.createElement('input');
+        sizeInput.type = 'text';
+        sizeInput.name = 'size[]';
+        sizeInput.value = size;
+        sizeInput.readOnly = true;
+        productEntry.appendChild(sizeInput);
 
-                // Product Price
-                var priceInput = document.createElement('input');
-                priceInput.type = 'text';
-                priceInput.name = 'price[]';
-                priceInput.value = '₱' + price.toFixed(2);
-                priceInput.readOnly = true;
-                productEntry.appendChild(priceInput);
+        // Product Price
+        var priceInput = document.createElement('input');
+        priceInput.type = 'text';
+        priceInput.name = 'price[]';
+        priceInput.value = '₱' + price.toFixed(2);
+        priceInput.readOnly = true;
+        productEntry.appendChild(priceInput);
 
-                // Quantity Field
-                var quantityInput = document.createElement('input');
-                quantityInput.type = 'number';
-                quantityInput.name = 'quantity[]';
-                quantityInput.min = 1;
-                quantityInput.value = 1; // Default quantity
-                quantityInput.required = true;
-                quantityInput.addEventListener('input', updateTotalAmount); // Update total when quantity changes
-                productEntry.appendChild(quantityInput);
+        // Quantity Field
+        var quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.name = 'quantity[]';
+        quantityInput.min = 1;
+        quantityInput.value = 1; // Default quantity
+        quantityInput.required = true;
+        quantityInput.addEventListener('input', updateTotalAmount); // Update total when quantity changes
+        productEntry.appendChild(quantityInput);
 
-                // Append product entry to selected products container
-                selectedProductsContainer.appendChild(productEntry);
-            }
+        // Remove Button
+        var removeButton = document.createElement('button');
+        removeButton.type = 'button'; // Prevent form submission
+        removeButton.classList.add('ml-4', 'bg-red-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-red-600');
+        removeButton.innerText = 'Remove';
+        removeButton.addEventListener('click', function() {
+            selectedProductsContainer.removeChild(productEntry); // Remove the product entry
+            updateTotalAmount(); // Update total amount after removal
+        });
+        productEntry.appendChild(removeButton);
 
-            // Update total amount
-            updateTotalAmount();
-        }
+        // Append product entry to selected products container
+        selectedProductsContainer.appendChild(productEntry);
+    }
 
+    // Update total amount
+    updateTotalAmount();
+}
         // Function to calculate the total amount of selected products
         function updateTotalAmount() {
             var totalAmount = 0;
